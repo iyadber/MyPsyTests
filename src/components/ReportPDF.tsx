@@ -181,13 +181,53 @@ export const ReportPDFDocument = ({ test, result }: ReportPDFProps) => {
 
 export const generatePDF = async (test: any, result: any) => {
   const { pdf } = await import('@alexandernanberg/react-pdf-renderer');
+  const { Capacitor } = await import('@capacitor/core');
+  
   const blob = await pdf(<ReportPDFDocument test={test} result={result} />).toBlob();
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `تقرير-${test?.nameAr || 'اختبار'}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 100);
+  const fileName = `تقرير-${test?.nameAr || 'اختبار'}.pdf`;
+
+  if (Capacitor.isNativePlatform()) {
+    const { Filesystem, Directory } = await import('@capacitor/filesystem');
+    const { Share } = await import('@capacitor/share');
+
+    try {
+      // Helper to convert blob to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          resolve(base64data.split(',')[1]);
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(blob);
+      const base64 = await base64Promise;
+
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.Cache, // Use Cache for temporary sharing
+      });
+
+      await Share.share({
+        title: fileName,
+        text: 'تقرير الاختبار النفسي',
+        url: savedFile.uri,
+        dialogTitle: 'تصدير التقرير',
+      });
+    } catch (error) {
+      console.error('Error sharing PDF:', error);
+      throw error;
+    }
+  } else {
+    // Web implementation
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
 };

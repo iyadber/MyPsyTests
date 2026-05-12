@@ -52,10 +52,28 @@ export default function Results() {
             setIsExporting(true);
             try {
               const { generatePDF } = await import('../components/ReportPDF');
+              const { Capacitor } = await import('@capacitor/core');
+              
+              if (Capacitor.isNativePlatform()) {
+                const { Toast } = await import('@capacitor/toast');
+                await Toast.show({ text: 'جاري تحضير التقرير...' });
+              }
+              
               await generatePDF(test, result);
+              
+              if (Capacitor.isNativePlatform()) {
+                const { Toast } = await import('@capacitor/toast');
+                await Toast.show({ text: 'تم إنشاء التقرير بنجاح' });
+              }
             } catch (err) {
               console.error(err);
-              alert('حدث خطأ أثناء التصدير');
+              const { Capacitor } = await import('@capacitor/core');
+              if (Capacitor.isNativePlatform()) {
+                const { Toast } = await import('@capacitor/toast');
+                await Toast.show({ text: 'حدث خطأ أثناء التصدير' });
+              } else {
+                alert('حدث خطأ أثناء التصدير');
+              }
             } finally {
               setIsExporting(false);
             }
