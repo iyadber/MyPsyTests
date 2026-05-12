@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "113513926370",
+    "project_id": "gen-lang-client-0766625454",
+    "storage_bucket": "gen-lang-client-0766625454.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113513926370:android:2972c1854cc4c77ee958bb",
+        "android_client_info": {
+          "package_name": "com.mypsytests.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "113513926370-6hrfdfjvjvg5jthfifeei3qvtae6mrhv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mypsytests.app",
+            "certificate_hash": "7aa670bf7ff0b8c2026c38f9049b5c288b5eab52"
+          }
+        },
+        {
+          "client_id": "113513926370-qlej7i0tbhcavffp7h6pltd13fs5e5h5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCi3QY-5-BJFuTp2BYqrfhAOVv_bCnpIn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "113513926370-9jskp5orr6a6ksvu6av94brp4c0jn8n4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

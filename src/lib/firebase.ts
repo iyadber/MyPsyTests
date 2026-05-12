@@ -9,10 +9,26 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { signInWithCredential } from 'firebase/auth';
+
 export async function loginWithGoogle() {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
+    let user;
+    if (Capacitor.isNativePlatform()) {
+      // For Android/iOS Capacitor - Requires google-services.json setup
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      if (!result.credential?.idToken) throw new Error('No ID token found');
+      
+      const credential = GoogleAuthProvider.credential(result.credential.idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      user = userCredential.user;
+    } else {
+      // For Web
+      const result = await signInWithPopup(auth, googleProvider);
+      user = result.user;
+    }
     
     // Check if user exists in DB
     const userRef = doc(db, 'users', user.uid);
@@ -28,11 +44,9 @@ export async function loginWithGoogle() {
       });
     }
 
-    // Populate tests for simplicity in demo
-    // Wait, regular user can't write to tests according to rules.
-    // So if rules enforce admin only, we can't write tests here as a normal user.
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, 'users');
+  } catch (error: any) {
+    console.error('Google Login Error:', error);
+    alert(`فشل تسجيل الدخول: ${error?.message || 'حدث خطأ غير معروف'}`);
   }
 }
 

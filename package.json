@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@alexandernanberg/react-pdf-renderer": "^4.0.0-canary-5",
+    "@capacitor-firebase/authentication": "^8.2.0",
     "@capacitor/core": "^8.3.3",
     "@fontsource/amiri": "^5.2.8",
     "@google/genai": "^1.29.0",
@@ -27,6 +28,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "firebase": "^12.13.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
@@ -48,6 +50,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "node-forge": "^1.4.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
