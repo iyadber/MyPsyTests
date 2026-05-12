@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "113513926370-6hrfdfjvjvg5jthfifeei3qvtae6mrhv.apps.googleusercontent.com",
+          "client_id": "113513926370-f4rntjqejgds78klhihtig1co3donh8u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.mypsytests.app",
-            "certificate_hash": "7aa670bf7ff0b8c2026c38f9049b5c288b5eab52"
+            "certificate_hash": "591ebac9b9a672110c5b590dc1c09e07f1cf2af5"
           }
         },
         {
