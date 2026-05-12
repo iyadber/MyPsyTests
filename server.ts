@@ -12,10 +12,7 @@ let genAI: GoogleGenAI | null = null;
 
 function getGenAI() {
   if (!genAI) {
-    let key = process.env.GEMINI_API_KEY;
-    if (!key || key === "MY_GEMINI_API_KEY" || key === "AI Studio Free Tier") {
-      key = process.env.Api2;
-    }
+    const key = process.env.GEMINI_API_KEY;
     if (!key || key === "MY_GEMINI_API_KEY") {
       throw new Error("يرجى إضافة مفتاح GEMINI_API_KEY صالح في إعدادات Secrets.");
     }

@@ -5,6 +5,7 @@ import { useAuthStore } from '../store';
 import { Loader2 } from 'lucide-react';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { analyzeTestClient } from '../lib/geminiClient';
 
 export default function TestSession() {
   const { testId } = useParams();
@@ -38,25 +39,15 @@ export default function TestSession() {
         const totalScore = newAnswers.reduce((a, b) => a + b, 0);
 
         try {
-          // Send to custom server endpoint to get analysis
-          const response = await fetch('/api/analyze-test', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-               testName: test.nameAr,
-               totalScore,
-               maxScore: test.maxScore,
-               subScores: {}, // Mock subscores
-               age: user?.age || null, 
-               gender: user?.gender || 'unknown'
-            }),
+          // Build the analysis request
+          const aiAnalysis = await analyzeTestClient({
+            testName: test.nameAr,
+            totalScore,
+            maxScore: test.maxScore,
+            subScores: {},
+            age: user?.age || null,
+            gender: user?.gender || 'unknown'
           });
-
-          if (!response.ok) throw new Error("Analysis failed");
-          
-          const aiAnalysis = await response.json();
 
           // Save to Firestore
           const docRef = await addDoc(collection(db, 'testResults'), {
