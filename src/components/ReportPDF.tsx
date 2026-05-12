@@ -189,7 +189,7 @@ export const generatePDF = async (test: any, result: any) => {
   if (Capacitor.isNativePlatform()) {
     const { Filesystem, Directory } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');
-    const { ActionSheet } = await import('@capacitor/action-sheet');
+    const { ActionSheet, ActionSheetButtonStyle } = await import('@capacitor/action-sheet');
     const { Toast } = await import('@capacitor/toast');
 
     try {
@@ -206,7 +206,7 @@ export const generatePDF = async (test: any, result: any) => {
           },
           {
             title: 'إلغاء',
-            style: 'CANCEL',
+            style: ActionSheetButtonStyle.Cancel,
           },
         ],
       });

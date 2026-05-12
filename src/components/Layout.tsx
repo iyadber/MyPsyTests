@@ -29,8 +29,8 @@ export default function Layout() {
     <div className="flex flex-col min-h-screen bg-paper max-w-md mx-auto relative overflow-hidden border-x border-border">
       <header className="bg-surface border-b border-border p-4 sticky top-0 z-10 flex justify-between items-center h-16">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary text-black rounded-lg flex items-center justify-center font-bold text-lg">M</div>
-          <h1 className="font-bold text-xl text-ink">اختباراتي</h1>
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <h1 className="font-bold text-xl text-ink uppercase tracking-wider">NAFSI</h1>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={toggleTheme} className="p-2 text-ink2 hover:text-ink transition-colors" aria-label="Toggle Theme">

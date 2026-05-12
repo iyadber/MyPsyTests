@@ -10,6 +10,7 @@ import { auth, db } from './lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuthStore, useThemeStore } from './store';
 import Layout from './components/Layout';
+import SplashScreen from './components/SplashScreen';
 import Home from './pages/Home';
 import TestLibrary from './pages/TestLibrary';
 import TestSession from './pages/TestSession';
@@ -25,12 +26,17 @@ import Onboarding from './pages/Onboarding';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const setUser = useAuthStore((state) => state.setUser);
   
   // Initialize theme
   useThemeStore();
   
   useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000); // Show splash for at least 2 seconds
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -55,11 +61,15 @@ export default function App() {
       }
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      clearTimeout(splashTimer);
+    };
   }, [setUser]);
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>;
+  if (loading || showSplash) {
+    return <SplashScreen />;
   }
 
   // Handle protected routing logic right here or let Layout / components handle it.
