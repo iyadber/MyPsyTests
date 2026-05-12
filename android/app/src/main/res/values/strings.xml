@@ -4,4 +4,5 @@
     <string name="title_activity_main">MyPsyTests</string>
     <string name="package_name">com.mypsytests.app</string>
     <string name="custom_url_scheme">com.mypsytests.app</string>
+    <string name="server_client_id">113513926370-qlej7i0tbhcavffp7h6pltd13fs5e5h5.apps.googleusercontent.com</string>
 </resources>
