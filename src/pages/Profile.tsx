@@ -53,7 +53,8 @@ export default function Profile() {
   };
 
   const roleText = {
-    user: 'مستخدم',
+    user: 'مريض',
+    psychologist: 'أخصائي نفسي',
     specialist: 'أخصائي',
     admin: 'مدير النظام'
   };
@@ -125,6 +126,19 @@ export default function Profile() {
                   </div>
                 </div>
              </Link>
+
+             {user.role === 'psychologist' && (
+               <Link to="/clinic-profile" className="flex items-center justify-between text-sm group hover:bg-paper -mx-2 px-2 py-1.5 rounded-lg transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-sm">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-ink group-hover:text-emerald-500 transition-colors">إدارة العيادة</p>
+                    </div>
+                  </div>
+               </Link>
+             )}
           </motion.div>
         </div>
 
@@ -244,6 +258,18 @@ export default function Profile() {
                 </div>
             </div>
         </div>
+        {user.role === 'psychologist' && (
+          <div className="md:hidden mt-2 flex gap-2">
+            <Link to="/clinic-profile" className="flex-1 bg-surface border border-border p-3 rounded-xl flex items-center gap-3 hover:border-emerald-500/30 transition-colors shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-ink">إدارة العيادة</p>
+                </div>
+            </Link>
+          </div>
+        )}
       </div>
     </motion.div>
   );

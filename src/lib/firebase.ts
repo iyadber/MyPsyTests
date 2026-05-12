@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, serverTimestamp, addDoc, updateDoc } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { TEST_LIBRARY } from './tests';
@@ -12,6 +12,50 @@ export const googleProvider = new GoogleAuthProvider();
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { signInWithCredential } from 'firebase/auth';
+
+export async function loginWithEmail(email: string, pass: string) {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, pass);
+    const user = result.user;
+    
+    // Check if user exists in DB
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        displayName: user.displayName || email.split('@')[0],
+        email: user.email || '',
+        role: 'user', // Default role
+        createdAt: serverTimestamp(),
+        emailVerified: user.emailVerified,
+      });
+    }
+  } catch (error: any) {
+    console.error('Email Login Error:', error);
+    throw error;
+  }
+}
+
+export async function signupWithEmail(email: string, pass: string, username: string) {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = result.user;
+    
+    // Add user to DB
+    const userRef = doc(db, 'users', user.uid);
+    await setDoc(userRef, {
+      displayName: username || email.split('@')[0],
+      email: user.email || '',
+      role: 'user', // Default role
+      createdAt: serverTimestamp(),
+      emailVerified: user.emailVerified,
+    });
+  } catch (error: any) {
+    console.error('Email Signup Error:', error);
+    throw error;
+  }
+}
 
 export async function loginWithGoogle() {
   try {

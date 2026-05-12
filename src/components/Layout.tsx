@@ -14,6 +14,8 @@ export default function Layout() {
   useEffect(() => {
     if (!user && location.pathname !== '/login') {
       navigate('/login');
+    } else if (user && (!user.age || !user.gender)) {
+      navigate('/onboarding');
     }
   }, [user, navigate, location]);
 
@@ -46,8 +48,17 @@ export default function Layout() {
 
       <nav className="bg-surface border-t border-border p-2 fixed bottom-0 w-full max-w-md flex justify-around items-center z-10 pb-safe">
         <NavLink to="/" icon={<Home />} label="الرئيسية" active={location.pathname === '/'} />
-        <NavLink to="/tests" icon={<Library />} label="المكتبة" active={location.pathname.startsWith('/tests')} />
-        <NavLink to="/history" icon={<Activity />} label="سجلي" active={location.pathname.startsWith('/history')} />
+        {user?.role === 'psychologist' ? (
+          <>
+            <NavLink to="/appointments" icon={<Activity />} label="المواعيد" active={location.pathname.startsWith('/appointments')} />
+            <NavLink to="/clinic-profile" icon={<Library />} label="العيادة" active={location.pathname.startsWith('/clinic-profile')} />
+          </>
+        ) : (
+          <>
+            <NavLink to="/tests" icon={<Library />} label="المكتبة" active={location.pathname.startsWith('/tests')} />
+            <NavLink to="/history" icon={<Activity />} label="سجلي" active={location.pathname.startsWith('/history')} />
+          </>
+        )}
         <NavLink to="/profile" icon={<User />} label="حسابي" active={location.pathname.startsWith('/profile')} />
       </nav>
     </div>

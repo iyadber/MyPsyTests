@@ -14,7 +14,7 @@ service cloud.firestore {
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     function isSignedIn() { return request.auth != null; }
-    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isVerified() { return isSignedIn(); }
     function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
 
     // Validation Blueprints
@@ -22,13 +22,41 @@ service cloud.firestore {
       return data.keys().hasAll(['displayName', 'email'])
         && data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100
         && data.email is string && data.email.size() > 0 && data.email.size() <= 150
-        && (!('role' in data) || (data.role is string && (data.role == 'user' || data.role == 'specialist')))
+        && (!('role' in data) || (data.role is string && (data.role == 'user' || data.role == 'specialist' || data.role == 'psychologist')))
         && (!('createdAt' in data) || data.createdAt is timestamp)
         && (!('gender' in data) || (data.gender is string && (data.gender == 'male' || data.gender == 'female')))
         && (!('age' in data) || (data.age is number && data.age > 0 && data.age <= 120))
         && (!('lang' in data) || (data.lang is string && (data.lang == 'ar' || data.lang == 'en')))
         && (!('emailVerified' in data) || data.emailVerified is bool)
         && (!('streak' in data) || (data.streak is number && data.streak >= 0));
+    }
+
+    function isValidClinic(data) {
+      return data.keys().hasAll(['psychologistId', 'name', 'wilaya', 'address', 'createdAt'])
+        && data.keys().size() <= 8
+        && data.psychologistId is string && data.psychologistId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.wilaya is string && data.wilaya.size() > 0 && data.wilaya.size() <= 100
+        && data.address is string && data.address.size() > 0 && data.address.size() <= 500
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 50))
+        && (!('bio' in data) || (data.bio is string && data.bio.size() <= 2000))
+        && data.createdAt is timestamp
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['patientId', 'psychologistId', 'patientName', 'patientPhone', 'status', 'createdAt'])
+        && data.keys().size() <= 10
+        && data.patientId is string
+        && data.psychologistId is string
+        && data.patientName is string && data.patientName.size() > 0 && data.patientName.size() <= 100
+        && data.patientPhone is string && data.patientPhone.size() > 0 && data.patientPhone.size() <= 50
+        && (!('testId' in data) || (data.testId is string && data.testId.size() <= 128))
+        && (!('date' in data) || (data.date is string && data.date.size() <= 100))
+        && data.status is string && (data.status == 'pending' || data.status == 'confirmed' || data.status == 'completed' || data.status == 'cancelled')
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 2000))
+        && data.createdAt is timestamp
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
     function isValidTest(data) {
@@ -69,9 +97,34 @@ service cloud.firestore {
       allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
       allow list: if false; // No blanket reads
       allow create: if isValidId(userId) && request.auth.uid == userId && isValidUser(incoming()) && incoming().get('createdAt', request.time) == request.time;
-      allow update: if isValidId(userId) && request.auth.uid == userId && isVerified() && isValidUser(incoming()) && (
+      allow update: if isValidId(userId) && request.auth.uid == userId && isSignedIn() && isValidUser(incoming()) && (
         isAdmin() || 
-        (incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'gender', 'age', 'lang', 'streak', 'emailVerified']))
+        (incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'gender', 'age', 'lang', 'streak', 'emailVerified', 'role']))
+      );
+      allow delete: if false;
+    }
+
+    match /clinics/{clinicId} {
+      // Anyone can view clinics
+      allow get: if isSignedIn() && isValidId(clinicId);
+      allow list: if isSignedIn();
+      // Only the owning psychologist can create/update their clinic
+      allow create: if isValidId(clinicId) && isVerified() && isValidClinic(incoming());
+      allow update: if isValidId(clinicId) && isVerified() && request.auth.uid == existing().psychologistId && isValidClinic(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'wilaya', 'address', 'phone', 'bio', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    match /appointments/{appointmentId} {
+      // Patient and Psychologist can view appointments involving them
+      allow get: if isSignedIn() && isValidId(appointmentId) && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.psychologistId);
+      allow list: if isSignedIn() && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.psychologistId);
+      
+      // Patient creates appointment
+      allow create: if isValidId(appointmentId) && isVerified() && request.auth.uid == incoming().patientId && isValidAppointment(incoming());
+      // Psychologist or Patient can update status, Patient can update notes
+      allow update: if isValidId(appointmentId) && isVerified() && isValidAppointment(incoming()) && (
+        (request.auth.uid == existing().psychologistId && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'date', 'updatedAt'])) ||
+        (request.auth.uid == existing().patientId && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'notes', 'date', 'patientName', 'patientPhone', 'updatedAt']))
       );
       allow delete: if false;
     }

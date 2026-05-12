@@ -7,7 +7,7 @@
       "properties": {
         "displayName": { "type": "string" },
         "email": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "specialist", "admin"] },
+        "role": { "type": "string", "enum": ["user", "specialist", "psychologist", "admin"] },
         "gender": { "type": "string", "enum": ["male", "female"] },
         "age": { "type": "number" },
         "lang": { "type": "string", "enum": ["ar", "en"] },
@@ -16,6 +16,40 @@
         "streak": { "type": "number" }
       },
       "required": ["displayName", "email", "role", "createdAt"]
+    },
+    "Clinic": {
+      "title": "Clinic",
+      "description": "A psychologist's clinic profile",
+      "type": "object",
+      "properties": {
+        "psychologistId": { "type": "string" },
+        "name": { "type": "string" },
+        "wilaya": { "type": "string" },
+        "address": { "type": "string" },
+        "phone": { "type": "string" },
+        "bio": { "type": "string" },
+        "createdAt": { "type": "object" },
+        "updatedAt": { "type": "object" }
+      },
+      "required": ["psychologistId", "name", "wilaya", "address", "createdAt"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "A test booking appointment",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "psychologistId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "patientPhone": { "type": "string" },
+        "testId": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "object" },
+        "updatedAt": { "type": "object" }
+      },
+      "required": ["patientId", "psychologistId", "patientName", "patientPhone", "status", "createdAt"]
     },
     "Test": {
       "title": "Psychological Test",
@@ -59,6 +93,14 @@
     "users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Stores user profiles"
+    },
+    "clinics/{clinicId}": {
+      "schema": { "$ref": "#/entities/Clinic" },
+      "description": "Stores psychologist clinics"
+    },
+    "appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/Appointment" },
+      "description": "Stores test booking appointments"
     },
     "tests/{testId}": {
       "schema": { "$ref": "#/entities/Test" },

@@ -17,6 +17,11 @@ import Results from './pages/Results';
 import Login from './pages/Login';
 import History from './pages/History';
 import Profile from './pages/Profile';
+import ClinicProfile from './pages/ClinicProfile';
+import Psychologists from './pages/Psychologists';
+import Appointments from './pages/Appointments';
+
+import Onboarding from './pages/Onboarding';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -57,14 +62,21 @@ export default function App() {
     return <div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>;
   }
 
+  // Handle protected routing logic right here or let Layout / components handle it.
+  // We can let Layout handle user missing setup by also wrapping Onboarding.
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="tests" element={<TestLibrary />} />
           <Route path="tests/:testId" element={<TestSession />} />
+          <Route path="clinics" element={<Psychologists />} />
+          <Route path="appointments" element={<Appointments />} />
+          <Route path="clinic-profile" element={<ClinicProfile />} />
           <Route path="results/:resultId" element={<Results />} />
           <Route path="history" element={<History />} />
           <Route path="profile" element={<Profile />} />

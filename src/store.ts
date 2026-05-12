@@ -4,10 +4,36 @@ export interface User {
   uid: string;
   displayName: string;
   email: string | null;
-  role: 'user' | 'specialist' | 'admin';
+  role: 'user' | 'specialist' | 'psychologist' | 'admin';
   createdAt: number;
   age?: number;
   gender?: 'male' | 'female';
+}
+
+export interface Clinic {
+  id: string;
+  psychologistId: string;
+  name: string;
+  wilaya: string;
+  address: string;
+  phone?: string;
+  bio?: string;
+  createdAt: number;
+  updatedAt?: number;
+}
+
+export interface Appointment {
+  id: string;
+  patientId: string;
+  psychologistId: string;
+  patientName: string;
+  patientPhone: string;
+  testId?: string;
+  date?: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  notes?: string;
+  createdAt: number;
+  updatedAt?: number;
 }
 
 interface AuthState {
