@@ -2,12 +2,12 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Font } from '@alexandernanberg/react-pdf-renderer';
 import arabicReshaper from 'arabic-reshaper';
 
+import { amiriBase64 } from '../assets/amiriBase64';
+
 // Register Arabic Font
 Font.register({
   family: 'Amiri',
-  fonts: [
-    { src: '/Amiri-Regular.ttf' }
-  ]
+  src: `data:font/truetype;charset=utf-8;base64,${amiriBase64}`
 });
 
 const styles = StyleSheet.create({

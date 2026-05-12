@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { GoogleGenAI } from "@google/genai";
 
 let genAI: GoogleGenAI | null = null;
