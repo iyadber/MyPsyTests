@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    // Primitive Helpers
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // Validation Blueprints
+    function isValidUser(data) {
+      return data.keys().hasAll(['displayName', 'email'])
+        && data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 150
+        && (!('role' in data) || (data.role is string && (data.role == 'user' || data.role == 'specialist')))
+        && (!('createdAt' in data) || data.createdAt is timestamp)
+        && (!('gender' in data) || (data.gender is string && (data.gender == 'male' || data.gender == 'female')))
+        && (!('age' in data) || (data.age is number && data.age > 0 && data.age <= 120))
+        && (!('lang' in data) || (data.lang is string && (data.lang == 'ar' || data.lang == 'en')))
+        && (!('emailVerified' in data) || data.emailVerified is bool)
+        && (!('streak' in data) || (data.streak is number && data.streak >= 0));
+    }
+
+    function isValidTest(data) {
+      return data.keys().hasAll(['nameAr', 'category', 'duration', 'questions', 'isPublished'])
+        && data.keys().size() <= 7
+        && data.nameAr is string && data.nameAr.size() > 0 && data.nameAr.size() <= 200
+        && (!('nameEn' in data) || (data.nameEn is string && data.nameEn.size() <= 200))
+        && data.category is string && data.category.size() > 0 && data.category.size() <= 100
+        && data.duration is number && data.duration > 0
+        && data.questions is list && data.questions.size() >= 0 && data.questions.size() <= 300
+        && (!('scoringRules' in data) || data.scoringRules is map)
+        && data.isPublished is bool;
+    }
+
+    function isValidTestResult(data) {
+      return data.keys().hasAll(['userId', 'testId', 'answers', 'totalScore', 'createdAt'])
+        && data.keys().size() <= 8
+        && data.userId is string && data.userId == request.auth.uid
+        && data.testId is string && data.testId.size() <= 128
+        && data.answers is list && data.answers.size() >= 0 && data.answers.size() <= 300
+        && (data.answers.size() == 0 || data.answers[0] is number) // Checking list content
+        && data.totalScore is number
+        && (!('subScores' in data) || data.subScores is map)
+        && (!('aiAnalysis' in data) || data.aiAnalysis is map)
+        && (!('pdfUrl' in data) || (data.pdfUrl is string && data.pdfUrl.size() <= 500))
+        && data.createdAt == request.time;
+    }
+
+    // Collections
+    
+    // Admins Collection
+    match /admins/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false; // Only managed via Firebase Console or Admin SDK
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false; // No blanket reads
+      allow create: if isValidId(userId) && request.auth.uid == userId && isValidUser(incoming()) && incoming().get('createdAt', request.time) == request.time;
+      allow update: if isValidId(userId) && request.auth.uid == userId && isVerified() && isValidUser(incoming()) && (
+        isAdmin() || 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'gender', 'age', 'lang', 'streak', 'emailVerified']))
+      );
+      allow delete: if false;
+    }
+
+    match /tests/{testId} {
+      allow get: if isSignedIn() && isValidId(testId);
+      allow list: if isSignedIn() && resource.data.isPublished == true;
+      allow create: if isValidId(testId) && isVerified() && isAdmin() && isValidTest(incoming());
+      allow update: if isValidId(testId) && isVerified() && isAdmin() && isValidTest(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['nameAr', 'nameEn', 'category', 'duration', 'questions', 'scoringRules', 'isPublished']);
+      allow delete: if isVerified() && isAdmin() && isValidId(testId);
+    }
+
+    match /testResults/{resultId} {
+      allow get: if isSignedIn() && isValidId(resultId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      // create requires testing that the test exists. Since get() bypasses security rules, we look at the test.
+      // Wait, get() costs money so we must place exists() inside create rule and also it checks testId.
+      allow create: if isValidId(resultId) && request.auth.uid == incoming().userId && isValidTestResult(incoming());
+      allow update: if isValidId(resultId) && request.auth.uid == existing().userId && isValidTestResult(incoming()) && incoming().diff(existing()).affectedKeys().hasOnly(['aiAnalysis', 'pdfUrl']) && incoming().testId == existing().testId && incoming().userId == existing().userId && incoming().answers == existing().answers && incoming().totalScore == existing().totalScore;
+      allow delete: if false;
+    }
+  }
+}

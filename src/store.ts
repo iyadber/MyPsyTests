@@ -1,0 +1,50 @@
+import { create } from 'zustand';
+
+export interface User {
+  uid: string;
+  displayName: string;
+  email: string | null;
+  role: 'user' | 'specialist' | 'admin';
+  createdAt: number;
+  age?: number;
+  gender?: 'male' | 'female';
+}
+
+interface AuthState {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  setUser: (user) => set({ user }),
+}));
+
+interface ThemeState {
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
+}
+
+export const useThemeStore = create<ThemeState>((set) => {
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initialTheme = localStorage.getItem('theme-preference') as 'light' | 'dark' | null;
+  const theme = initialTheme || (isDark ? 'dark' : 'dark');
+
+  if (theme === 'light') {
+    document.documentElement.classList.add('light-theme');
+  }
+
+  return {
+    theme,
+    toggleTheme: () => set((state) => {
+      const newTheme = state.theme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme-preference', newTheme);
+      if (newTheme === 'light') {
+        document.documentElement.classList.add('light-theme');
+      } else {
+        document.documentElement.classList.remove('light-theme');
+      }
+      return { theme: newTheme };
+    }),
+  };
+});

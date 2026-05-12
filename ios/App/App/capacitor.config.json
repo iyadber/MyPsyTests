@@ -1,0 +1,6 @@
+{
+	"appId": "com.mypsytests.app",
+	"appName": "MyPsyTests",
+	"webDir": "dist",
+	"packageClassList": []
+}

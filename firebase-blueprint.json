@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "specialist", "admin"] },
+        "gender": { "type": "string", "enum": ["male", "female"] },
+        "age": { "type": "number" },
+        "lang": { "type": "string", "enum": ["ar", "en"] },
+        "createdAt": { "type": "object" },
+        "emailVerified": { "type": "boolean" },
+        "streak": { "type": "number" }
+      },
+      "required": ["displayName", "email", "role", "createdAt"]
+    },
+    "Test": {
+      "title": "Psychological Test",
+      "description": "Definition of a psychological test",
+      "type": "object",
+      "properties": {
+        "nameAr": { "type": "string" },
+        "nameEn": { "type": "string" },
+        "category": { "type": "string" },
+        "duration": { "type": "number" },
+        "questions": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "scoringRules": { "type": "object" },
+        "isPublished": { "type": "boolean" }
+      },
+      "required": ["nameAr", "category", "duration", "questions", "isPublished"]
+    },
+    "TestResult": {
+      "title": "Test Result",
+      "description": "Result of a taken test",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "testId": { "type": "string" },
+        "answers": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "totalScore": { "type": "number" },
+        "subScores": { "type": "object" },
+        "aiAnalysis": { "type": "object" },
+        "pdfUrl": { "type": "string" },
+        "createdAt": { "type": "object" }
+      },
+      "required": ["userId", "testId", "answers", "totalScore", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles"
+    },
+    "tests/{testId}": {
+      "schema": { "$ref": "#/entities/Test" },
+      "description": "Stores available tests"
+    },
+    "testResults/{resultId}": {
+      "schema": { "$ref": "#/entities/TestResult" },
+      "description": "Stores user test results"
+    }
+  }
+}
