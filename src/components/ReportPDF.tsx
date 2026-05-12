@@ -189,8 +189,30 @@ export const generatePDF = async (test: any, result: any) => {
   if (Capacitor.isNativePlatform()) {
     const { Filesystem, Directory } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');
+    const { ActionSheet } = await import('@capacitor/action-sheet');
+    const { Toast } = await import('@capacitor/toast');
 
     try {
+      // Ask user where to save/share
+      const resultAction = await ActionSheet.showActions({
+        title: 'تصدير التقرير',
+        message: 'كيف تريد حفظ هذا التقرير؟',
+        options: [
+          {
+            title: 'حفظ في ملفات الهاتف (Documents)',
+          },
+          {
+            title: 'إرسال أو مشاركة',
+          },
+          {
+            title: 'إلغاء',
+            style: 'CANCEL',
+          },
+        ],
+      });
+
+      if (resultAction.index === 2) return; // User cancelled
+
       // Helper to convert blob to base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
@@ -203,20 +225,39 @@ export const generatePDF = async (test: any, result: any) => {
       reader.readAsDataURL(blob);
       const base64 = await base64Promise;
 
-      const savedFile = await Filesystem.writeFile({
-        path: fileName,
-        data: base64,
-        directory: Directory.Cache, // Use Cache for temporary sharing
-      });
+      if (resultAction.index === 0) {
+        // Save to Documents
+        try {
+          await Filesystem.writeFile({
+            path: fileName,
+            data: base64,
+            directory: Directory.Documents,
+          });
+          await Toast.show({
+            text: `تم حفظ الملف بنجاح في مجلد المستندات`,
+            duration: 'long'
+          });
+        } catch (err) {
+          console.error('Save error:', err);
+          await Toast.show({ text: 'فشل حفظ الملف في المستندات' });
+        }
+      } else if (resultAction.index === 1) {
+        // Share
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Cache, // Use Cache for temporary sharing
+        });
 
-      await Share.share({
-        title: fileName,
-        text: 'تقرير الاختبار النفسي',
-        url: savedFile.uri,
-        dialogTitle: 'تصدير التقرير',
-      });
+        await Share.share({
+          title: fileName,
+          text: 'تقرير الاختبار النفسي',
+          url: savedFile.uri,
+          dialogTitle: 'تصدير التقرير',
+        });
+      }
     } catch (error) {
-      console.error('Error sharing PDF:', error);
+      console.error('Error handling PDF:', error);
       throw error;
     }
   } else {

@@ -60,11 +60,6 @@ export default function Results() {
               }
               
               await generatePDF(test, result);
-              
-              if (Capacitor.isNativePlatform()) {
-                const { Toast } = await import('@capacitor/toast');
-                await Toast.show({ text: 'تم إنشاء التقرير بنجاح' });
-              }
             } catch (err) {
               console.error(err);
               const { Capacitor } = await import('@capacitor/core');
