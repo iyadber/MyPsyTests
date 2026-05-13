@@ -16,18 +16,6 @@
 }
 
 :root {
-  --theme-ink: #ffffff;
-  --theme-ink2: #a1a1aa;
-  --theme-ink3: #71717a;
-  --theme-primary: #44BB99;
-  --theme-primary-light: #44BB9933;
-  --theme-paper: #050505;
-  --theme-surface: #111111;
-  --theme-surface-hover: #1a1a1a;
-  --theme-border: #27272a;
-}
-
-:root.light-theme {
   --theme-ink: #000000;
   --theme-ink2: #52525b;
   --theme-ink3: #a1a1aa;
@@ -37,6 +25,18 @@
   --theme-surface: #ffffff;
   --theme-surface-hover: #f9f9fa;
   --theme-border: #e4e4e7;
+}
+
+:root.dark-theme {
+  --theme-ink: #ffffff;
+  --theme-ink2: #a1a1aa;
+  --theme-ink3: #71717a;
+  --theme-primary: #44BB99;
+  --theme-primary-light: #44BB9933;
+  --theme-paper: #050505;
+  --theme-surface: #111111;
+  --theme-surface-hover: #1a1a1a;
+  --theme-border: #27272a;
 }
 
 body {

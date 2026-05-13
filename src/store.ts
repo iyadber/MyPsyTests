@@ -54,10 +54,10 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>((set) => {
   const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const initialTheme = localStorage.getItem('theme-preference') as 'light' | 'dark' | null;
-  const theme = initialTheme || (isDark ? 'dark' : 'dark');
+  const theme = initialTheme || 'light';
 
-  if (theme === 'light') {
-    document.documentElement.classList.add('light-theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark-theme');
   }
 
   return {
@@ -65,10 +65,10 @@ export const useThemeStore = create<ThemeState>((set) => {
     toggleTheme: () => set((state) => {
       const newTheme = state.theme === 'light' ? 'dark' : 'light';
       localStorage.setItem('theme-preference', newTheme);
-      if (newTheme === 'light') {
-        document.documentElement.classList.add('light-theme');
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark-theme');
       } else {
-        document.documentElement.classList.remove('light-theme');
+        document.documentElement.classList.remove('dark-theme');
       }
       return { theme: newTheme };
     }),
