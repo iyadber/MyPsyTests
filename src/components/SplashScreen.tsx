@@ -27,7 +27,7 @@ export default function SplashScreen() {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-primary text-2xl font-bold font-sans"
         >
-          NAFSI
+          نفسيتي
         </motion.div>
         
         <motion.div 
